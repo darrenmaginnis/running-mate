@@ -1,6 +1,6 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/LinearLayout2"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -9,8 +9,128 @@
         android:id="@+id/mapView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:apiKey="0uOSPBOfMDF2-wcVfcsCqbKZtXslvEQdF9XHAqQ"
         android:clickable="true"
         android:enabled="true" />
-    
-</LinearLayout>
+
+    <SlidingDrawer
+        android:id="@+id/slidingDrawer1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:content="@+id/content"
+        android:handle="@+id/handle" >
+
+        <Button
+            android:id="@+id/handle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/slide" />
+		
+		<RelativeLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_texture" >
+            
+                    
+			<TextView
+               android:id="@+id/textViewLat"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentTop="true"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <TextView
+               android:id="@+id/textViewLon"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_below="@+id/textViewLat"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <TextView
+               android:id="@+id/textViewDistance"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_below="@+id/textViewLon"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <TextView
+               android:id="@+id/textViewSpeed"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_below="@+id/textViewDistance"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <TextView
+               android:id="@+id/textViewBarring"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_below="@+id/textViewSpeed"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <TextView
+               android:id="@+id/textViewAltitude"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_below="@+id/textViewBarring"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <TextView
+               android:id="@+id/textViewWeight"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentLeft="true"
+               android:layout_below="@+id/textViewAltitude"
+               android:layout_marginTop="10dp"
+               android:layout_toLeftOf="@+id/editTextWeight"
+               android:text="@string/Weight"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+
+           <EditText
+               android:id="@+id/editTextWeight"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignParentRight="true"
+               android:layout_below="@id/textViewAltitude"
+               android:ems="10"
+               android:inputType="numberDecimal"
+               android:text="150.0" >
+               <requestFocus />
+			</EditText>
+        		
+			<TextView
+               android:id="@+id/textCalories"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_below="@+id/editTextWeight"
+               android:layout_centerHorizontal="true"
+               android:layout_marginTop="10dp"
+               android:textAppearance="?android:attr/textAppearanceMedium"
+               android:textColor="@color/White" />
+        </RelativeLayout>
+    </SlidingDrawer>
+
+</RelativeLayout>

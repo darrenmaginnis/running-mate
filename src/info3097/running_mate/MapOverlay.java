@@ -33,25 +33,18 @@ public class MapOverlay extends Overlay {
 	@Override
 	public boolean draw(Canvas canvas, MapView mapView,boolean shadow, long when) {
 		super.draw(canvas,mapView,shadow);
-		ArrayList<Point> points = new ArrayList<Point>();
-		// translate GeoPoints to screen points
-		for (GeoPoint geoPoint : track) {
-			Point p = new Point();
-			mapView.getProjection().toPixels(geoPoint, p);
-			points.add(p);
-		}
-		
-		// draw to the overlay
 		Paint paint = new Paint();
 		paint.setColor(Color.RED);
 		Point lastPoint = null;
-		for (Point point : points) {
+		// translate GeoPoints to screen points and draw to the overlay
+		for (GeoPoint geoPoint : track) {
+			Point p = new Point();
+			mapView.getProjection().toPixels(geoPoint, p);
 			if (lastPoint != null) {
-				canvas.drawLine(lastPoint.x,lastPoint.y, point.x,point.y, paint);
+				canvas.drawLine(lastPoint.x,lastPoint.y, p.x,p.y, paint);
 			}
-			lastPoint = point;
-		}
-		
+			lastPoint = p;
+		}		
 		return true;
     	
 	}	

@@ -5,12 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -24,6 +29,14 @@ public class MainActivity extends MapActivity implements LocationListener {
 	private MapView mapView;
 	private MapController mc;
 	private ArrayList<GeoPoint> track;
+	private TextView Lat;
+	private TextView Lon;
+	private TextView Spd;
+	private TextView Alt;
+	private TextView Brng;
+	private TextView Dst;
+	private TextView CB;
+	private EditText weight;
 	/* 
 	  	lastKnownLocation
 	  	.distanceTo(Location dest) Returns the approximate distance in meters between this location and the given location.
@@ -48,18 +61,64 @@ public class MainActivity extends MapActivity implements LocationListener {
         mapView.setBuiltInZoomControls(true);
         mapView.setSatellite(true);
         mapView.setTraffic(true);
-        mc = mapView.getController();
+        mc = mapView.getController();        
+        Lat = (TextView)findViewById(R.id.textViewLat);
+    	Lon = (TextView)findViewById(R.id.textViewLon);
+    	Spd = (TextView)findViewById(R.id.textViewSpeed);
+    	Alt = (TextView)findViewById(R.id.textViewAltitude);
+    	Brng = (TextView)findViewById(R.id.textViewBarring);
+    	Dst = (TextView)findViewById(R.id.textViewDistance);
+    	CB = (TextView)findViewById(R.id.textCalories);
+    	weight = (EditText)findViewById(R.id.editTextWeight);
+    	
         //TODO: have the following in preserved in preferences
         distanceTraveled = 0.0F;
         calorieBurned = 0.0F;
-        //lastKnownLocation
     }
+    
+//	/* (non-Javadoc)
+//	 * 
+//	 * @see android.app.Activity#onCreateDialog(int)
+//	 */
+//	@Override
+//	@Deprecated
+//	protected Dialog onCreateDialog(int id) {
+//		// TODO Auto-generated method stub
+//		switch (id) {
+//		// create About Dialog
+//		case 0:
+//			return new AlertDialog.Builder(this)
+//					.setIcon(R.drawable.ic_launcher)
+//					.setTitle("About")
+//					.setMessage(
+//							"Programmed by:\n Ryan Johnston \n Darren Maginnis \n "
+//									+ " An App that tracks how far you run, updates every 30 seconds with new location.\n©2012")
+//					.setPositiveButton("OK",
+//							new DialogInterface.OnClickListener() {
+//								public void onClick(DialogInterface dialog,
+//										int whichButton) {
+//
+//								}
+//							}).create();
+//		}
+//		return null;
+//	}
 
-    @Override
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
+	
+
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		return true;
+	}
 
 	/* (non-Javadoc)
 	 * @see android.location.LocationListener#onLocationChanged(android.location.Location)
@@ -73,9 +132,33 @@ public class MainActivity extends MapActivity implements LocationListener {
 		GeoPoint p = new GeoPoint((int)(location.getLatitude()*1E6), (int)(location.getLongitude()*1E6));
 		track.add(p);		
 		mc.animateTo(p);
+	    mc.setZoom(16); 
         List<Overlay> listOfOverlays = mapView.getOverlays();
         listOfOverlays.clear();
         listOfOverlays.add(new MapOverlay(track));
+        
+	    Lat.setText(R.string.Latitude);
+	    Lat.setText(((String)Lat.getText()) + ": " + Location.convert(lastKnownLocation.getLatitude(),Location.FORMAT_SECONDS));
+    	
+	    Lon.setText(R.string.Longitude);
+    	Lon.setText(((String)Lon.getText()) + ": " + Location.convert(lastKnownLocation.getLongitude(),Location.FORMAT_SECONDS));
+    	
+    	Spd.setText(R.string.Speed);
+    	Spd.setText(((String)Spd.getText()) + ": " + String.valueOf(lastKnownLocation.getSpeed() + "m/s"));
+    	
+    	Alt.setText(R.string.Altitude);
+    	Alt.setText(((String)Alt.getText()) + ": " + String.valueOf(lastKnownLocation.getAltitude() + "m"));
+    	
+    	Brng.setText(R.string.Baring);
+    	Brng.setText(((String)Brng.getText()) + ": " + String.valueOf(lastKnownLocation.getBearing() + "°N"));
+    	
+    	Dst.setText(R.string.Distance);
+    	Dst.setText(((String)Dst.getText()) + ": " + String.valueOf(distanceTraveled) + "m");
+    	
+    	CB.setText(R.string.CaloriesBurned);
+    	Dst.setText(((String)CB.getText()) + ": " 
+    	+ String.valueOf((distanceTraveled * Double.parseDouble(String.valueOf(weight.getText()))* 0.653))); //(yourDistance * yourWeight) * .653
+    	
 	}
 
 	/* (non-Javadoc)
@@ -114,6 +197,17 @@ public class MainActivity extends MapActivity implements LocationListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		boolean enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+		// Check if enabled and if not send user to the GSP settings
+		// Better solution would be to display a dialog and suggesting to 
+		// go to the settings
+		if (!enabled) {
+		  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+		  startActivity(intent);
+		} 
+		
 		//Resume updates from GPS
 		if(lastKnownLocation == null) {
 			lastKnownLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -126,9 +220,29 @@ public class MainActivity extends MapActivity implements LocationListener {
         List<Overlay> listOfOverlays = mapView.getOverlays();
         listOfOverlays.clear();
         listOfOverlays.add(new MapOverlay(track));
-        GeoPoint p = new GeoPoint((int)(lastKnownLocation.getLatitude()*1E6), (int)(lastKnownLocation.getLongitude()*1E6));
-		mc.animateTo(p);
-        mc.setZoom(16); 
+        if(lastKnownLocation != null){
+        	GeoPoint p = new GeoPoint((int)(lastKnownLocation.getLatitude()*1E6), (int)(lastKnownLocation.getLongitude()*1E6));
+			mc.animateTo(p);
+		    mc.setZoom(16); 
+		    
+		    Lat.setText(R.string.Latitude);
+		    Lat.setText(((String)Lat.getText()) + ": " + Location.convert(lastKnownLocation.getLatitude(),Location.FORMAT_SECONDS));
+	    	
+		    Lon.setText(R.string.Longitude);
+	    	Lon.setText(((String)Lon.getText()) + ": " + Location.convert(lastKnownLocation.getLongitude(),Location.FORMAT_SECONDS));
+	    	
+	    	Spd.setText(R.string.Speed);
+	    	Spd.setText(((String)Spd.getText()) + ": " + String.valueOf(lastKnownLocation.getSpeed() + "m/s"));
+	    	
+	    	Alt.setText(R.string.Altitude);
+	    	Alt.setText(((String)Alt.getText()) + ": " + String.valueOf(lastKnownLocation.getAltitude() + "m"));
+	    	
+	    	Brng.setText(R.string.Baring);
+	    	Brng.setText(((String)Brng.getText()) + ": " + String.valueOf(lastKnownLocation.getBearing() + "°N"));
+	    	
+	    	Dst.setText(R.string.Distance);
+	    	Dst.setText(((String)Dst.getText()) + ": " + String.valueOf(distanceTraveled) + "m");		    
+        }
 	}
 	
 	@Override
