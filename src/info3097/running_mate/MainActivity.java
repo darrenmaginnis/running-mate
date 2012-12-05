@@ -1,7 +1,9 @@
 package info3097.running_mate;
 
 
-import android.app.Activity;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -10,9 +12,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 
-public class MainActivity extends Activity implements LocationListener {
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
+import com.google.android.maps.MapView;
+import com.google.android.maps.Overlay;
+
+public class MainActivity extends MapActivity implements LocationListener {
 	
 	private LocationManager lm;
+	private MapView mapView;
+	private MapController mc;
+	private ArrayList<GeoPoint> track;
 	/* 
 	  	lastKnownLocation
 	  	.distanceTo(Location dest) Returns the approximate distance in meters between this location and the given location.
@@ -33,10 +44,15 @@ public class MainActivity extends Activity implements LocationListener {
         setContentView(R.layout.activity_main);
         // setup and get the GPS started
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mapView = (MapView)findViewById(R.id.mapView);
+        mapView.setBuiltInZoomControls(true);
+        mapView.setSatellite(true);
+        mapView.setTraffic(true);
+        mc = mapView.getController();
         //TODO: have the following in preserved in preferences
         distanceTraveled = 0.0F;
         calorieBurned = 0.0F;
-//        lastKnownLocation
+        //lastKnownLocation
     }
 
     @Override
@@ -49,9 +65,17 @@ public class MainActivity extends Activity implements LocationListener {
 	 * @see android.location.LocationListener#onLocationChanged(android.location.Location)
 	 */
 	public void onLocationChanged(Location location) {
-		distanceTraveled += lastKnownLocation.distanceTo(location);
-		//TODO: Calc caleries
-		lastKnownLocation = location;
+		if(lastKnownLocation != null){
+			distanceTraveled += lastKnownLocation.distanceTo(location);
+		}
+		//TODO: Calc caleries, animate to
+		lastKnownLocation = location;	
+		GeoPoint p = new GeoPoint((int)(location.getLatitude()*1E6), (int)(location.getLongitude()*1E6));
+		track.add(p);		
+		mc.animateTo(p);
+        List<Overlay> listOfOverlays = mapView.getOverlays();
+        listOfOverlays.clear();
+        listOfOverlays.add(new MapOverlay(track));
 	}
 
 	/* (non-Javadoc)
@@ -74,7 +98,6 @@ public class MainActivity extends Activity implements LocationListener {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		Log.e("GPS", "status changed to " + provider + " [" + status + "]");
 	}
-
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onPause()
 	 */
@@ -94,8 +117,23 @@ public class MainActivity extends Activity implements LocationListener {
 		//Resume updates from GPS
 		if(lastKnownLocation == null) {
 			lastKnownLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		}        
+		}
+		if(track == null){
+			track = new ArrayList<GeoPoint>();
+		}
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, this); //every 30 seconds
+		// Add overlay over your google maps image
+        List<Overlay> listOfOverlays = mapView.getOverlays();
+        listOfOverlays.clear();
+        listOfOverlays.add(new MapOverlay(track));
+        GeoPoint p = new GeoPoint((int)(lastKnownLocation.getLatitude()*1E6), (int)(lastKnownLocation.getLongitude()*1E6));
+		mc.animateTo(p);
+        mc.setZoom(16); 
+	}
+	
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
 	}
     
 }
