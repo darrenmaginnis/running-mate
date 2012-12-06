@@ -6,6 +6,10 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -133,9 +137,10 @@ public class MainActivity extends MapActivity implements LocationListener {
 		track.add(p);		
 		mc.animateTo(p);
 	    mc.setZoom(16); 
+	    MapOverlay mo = new MapOverlay();
         List<Overlay> listOfOverlays = mapView.getOverlays();
         listOfOverlays.clear();
-        listOfOverlays.add(new MapOverlay(track));
+        listOfOverlays.add(mo);
         
 	    Lat.setText(R.string.Latitude);
 	    Lat.setText(((String)Lat.getText()) + ": " + Location.convert(lastKnownLocation.getLatitude(),Location.FORMAT_SECONDS));
@@ -217,9 +222,10 @@ public class MainActivity extends MapActivity implements LocationListener {
 		}
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, this); //every 30 seconds
 		// Add overlay over your google maps image
+		MapOverlay mo = new MapOverlay();
         List<Overlay> listOfOverlays = mapView.getOverlays();
         listOfOverlays.clear();
-        listOfOverlays.add(new MapOverlay(track));
+        listOfOverlays.add(mo);
         if(lastKnownLocation != null){
         	GeoPoint p = new GeoPoint((int)(lastKnownLocation.getLatitude()*1E6), (int)(lastKnownLocation.getLongitude()*1E6));
 			mc.animateTo(p);
@@ -248,6 +254,33 @@ public class MainActivity extends MapActivity implements LocationListener {
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
+	}
+	
+	
+	private class MapOverlay extends Overlay {
+
+		/* (non-Javadoc)
+		 * @see com.google.android.maps.Overlay#draw(android.graphics.Canvas, com.google.android.maps.MapView, boolean, long)
+		 */
+		@Override
+		public boolean draw(Canvas canvas, MapView mapView,boolean shadow, long when) {
+			super.draw(canvas,mapView,shadow);
+			Paint paint = new Paint();
+			paint.setColor(Color.RED);
+			Point lastPoint = null;
+			// translate GeoPoints to screen points and draw to the overlay
+			for (GeoPoint geoPoint : track) {
+				Point p = new Point();
+				mapView.getProjection().toPixels(geoPoint, p);
+				if (lastPoint != null) {
+					canvas.drawLine(lastPoint.x,lastPoint.y, p.x,p.y, paint);
+				}
+				lastPoint = p;
+			}		
+			return true;
+	    	
+		}	
+		
 	}
     
 }
