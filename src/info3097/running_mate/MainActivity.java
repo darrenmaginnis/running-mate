@@ -4,7 +4,10 @@ package info3097.running_mate;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -82,33 +85,32 @@ public class MainActivity extends MapActivity implements LocationListener {
         calorieBurned = 0.0F;
     }
     
-//	/* (non-Javadoc)
-//	 * 
-//	 * @see android.app.Activity#onCreateDialog(int)
-//	 */
-//	@Override
-//	@Deprecated
-//	protected Dialog onCreateDialog(int id) {
-//		// TODO Auto-generated method stub
-//		switch (id) {
-//		// create About Dialog
-//		case 0:
-//			return new AlertDialog.Builder(this)
-//					.setIcon(R.drawable.ic_launcher)
-//					.setTitle("About")
-//					.setMessage(
-//							"Programmed by:\n Ryan Johnston \n Darren Maginnis \n "
-//									+ " An App that tracks how far you run, updates every 30 seconds with new location.\n©2012")
-//					.setPositiveButton("OK",
-//							new DialogInterface.OnClickListener() {
-//								public void onClick(DialogInterface dialog,
-//										int whichButton) {
-//
-//								}
-//							}).create();
-//		}
-//		return null;
-//	}
+	/* (non-Javadoc)
+	 * 
+	 * @see android.app.Activity#onCreateDialog(int)
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		// TODO Auto-generated method stub
+		switch (id) {
+		// create About Dialog
+		case 0:
+			return new AlertDialog.Builder(this)
+					.setIcon(R.drawable.ic_launcher)
+					.setTitle("About")
+					.setMessage(
+							"Programmed by:\n Ryan Johnston \n Darren Maginnis \n "
+									+ " An App that tracks how far you run, and calories burned .\n©2012")
+					.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int whichButton) {
+
+								}
+							}).create();
+		}
+		return null;
+	}
 
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -122,7 +124,19 @@ public class MainActivity extends MapActivity implements LocationListener {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+		switch (item.getItemId()) {
+		case R.id.menu_reset:
+			distanceTraveled = 0.0F;
+			track.clear();
+			break;
+			
+		case R.id.menu_about:
+			showDialog(0);
+			break;
+
+		default:
+			break;
+		}
 		return true;
 	}
 
@@ -163,8 +177,8 @@ public class MainActivity extends MapActivity implements LocationListener {
     	Dst.setText(((String)Dst.getText()) + ": " + String.valueOf(distanceTraveled) + "m");
     	
     	CB.setText(R.string.CaloriesBurned);
-    	Dst.setText(((String)CB.getText()) + ": " 
-    	+ String.valueOf((distanceTraveled * Double.parseDouble(String.valueOf(weight.getText()))* 0.653))); //(yourDistance * yourWeight) * .653
+    	CB.setText(((String)CB.getText()) + ": " 
+    	+ String.valueOf((distanceTraveled * Float.parseFloat(String.valueOf(weight.getText()))* 0.653))); //(yourDistance * yourWeight) * .653
     	
 	}
 
@@ -201,7 +215,7 @@ public class MainActivity extends MapActivity implements LocationListener {
 	    SharedPreferences.Editor editPrefs = appPrefs.edit();
 	    	
 	    editPrefs.putFloat("distance", distanceTraveled);
-	    editPrefs.putFloat("calories", calorieBurned);
+	    editPrefs.putFloat("weight", Float.parseFloat(String.valueOf(weight.getText())));
 	    editPrefs.commit();		
 		
 		// Stop updates from GPS
@@ -227,8 +241,8 @@ public class MainActivity extends MapActivity implements LocationListener {
 		
 	    SharedPreferences appPrefs =		
 	    getSharedPreferences("appPreferences", MODE_PRIVATE);
-	    appPrefs.getFloat("distance", distanceTraveled);
-	    appPrefs.getFloat("calories", calorieBurned);
+	    distanceTraveled = appPrefs.getFloat("distance", 0.0F);
+	    weight.setText(String.valueOf(appPrefs.getFloat("weight", 150.0F)));
 		
 		//Resume updates from GPS
 		if(lastKnownLocation == null) {
@@ -264,7 +278,33 @@ public class MainActivity extends MapActivity implements LocationListener {
 	    	Brng.setText(((String)Brng.getText()) + ": " + String.valueOf(lastKnownLocation.getBearing() + "°N"));
 	    	
 	    	Dst.setText(R.string.Distance);
-	    	Dst.setText(((String)Dst.getText()) + ": " + String.valueOf(distanceTraveled) + "m");		    
+	    	Dst.setText(((String)Dst.getText()) + ": " + String.valueOf(distanceTraveled) + "m");		
+	    	
+	    	CB.setText(R.string.CaloriesBurned);
+	    	CB.setText(((String)CB.getText()) + ": " 
+	    	+ String.valueOf((distanceTraveled * Float.parseFloat(String.valueOf(weight.getText()))* 0.653))); //(yourDistance * yourWeight) * .653
+	    	
+        }else{
+        	Lat.setText(R.string.Latitude);
+		    Lat.setText(((String)Lat.getText()) + ": --");
+	    	
+		    Lon.setText(R.string.Longitude);
+	    	Lon.setText(((String)Lon.getText()) + ": --");
+	    	
+	    	Spd.setText(R.string.Speed);
+	    	Spd.setText(((String)Spd.getText()) + ": --m/s");
+	    	
+	    	Alt.setText(R.string.Altitude);
+	    	Alt.setText(((String)Alt.getText()) + ": --m");
+	    	
+	    	Brng.setText(R.string.Baring);
+	    	Brng.setText(((String)Brng.getText()) + ": --°N");
+	    	
+	    	Dst.setText(R.string.Distance);
+	    	Dst.setText(((String)Dst.getText()) + ": --m");
+	    	
+	    	CB.setText(R.string.CaloriesBurned);
+	    	CB.setText(((String)CB.getText()) + ": --"); //(yourDistance * yourWeight) * .653
         }
 	}
 	
@@ -293,7 +333,10 @@ public class MainActivity extends MapActivity implements LocationListener {
 					canvas.drawLine(lastPoint.x,lastPoint.y, p.x,p.y, paint);
 				}
 				lastPoint = p;
-			}		
+			}	
+			if(lastPoint != null){
+				canvas.drawCircle(lastPoint.x, lastPoint.y, 5, paint);
+			}
 			return true;
 	    	
 		}	
