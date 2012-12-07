@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -18,6 +19,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -189,9 +191,19 @@ public class MainActivity extends MapActivity implements LocationListener {
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onPause()
 	 */
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
+		
+	    SharedPreferences appPrefs =
+	    	getSharedPreferences("appPreferences", MODE_PRIVATE);
+	    SharedPreferences.Editor editPrefs = appPrefs.edit();
+	    	
+	    editPrefs.putFloat("distance", distanceTraveled);
+	    editPrefs.putFloat("calories", calorieBurned);
+	    editPrefs.commit();		
+		
 		// Stop updates from GPS
 		lm.removeUpdates(this);
 	}
@@ -212,6 +224,11 @@ public class MainActivity extends MapActivity implements LocationListener {
 		  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 		  startActivity(intent);
 		} 
+		
+	    SharedPreferences appPrefs =		
+	    getSharedPreferences("appPreferences", MODE_PRIVATE);
+	    appPrefs.getFloat("distance", distanceTraveled);
+	    appPrefs.getFloat("calories", calorieBurned);
 		
 		//Resume updates from GPS
 		if(lastKnownLocation == null) {
